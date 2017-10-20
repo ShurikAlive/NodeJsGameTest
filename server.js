@@ -28,24 +28,44 @@ io.on('connection', function(socket) {
   socket.on('new player', function() {
     players[socket.id] = {
       x: 300,
-      y: 300
+      y: 300,
+	  moveLeft: false,
+	  moveRight: false,
+	  moveUp: false,
+	  moveDown: false,
+	  speed: 0.5,
     };
   });
   
   socket.on('movement', function(data) {
     var player = players[socket.id] || {};
     if (data.left) {
-      player.x -= 5;
+      player.moveLeft = true;
     }
+	else {
+	  player.moveLeft = false;
+	}
+	
     if (data.up) {
-      player.y -= 5;
+      player.moveUp = true;
     }
+	else {
+	  player.moveUp = false;
+	}
+	
     if (data.right) {
-      player.x += 5;
+      player.moveRight = true;
     }
+	else {
+	  player.moveRight = false;
+	}
+	
     if (data.down) {
-      player.y += 5;
+      player.moveDown = true;
     }
+	else {
+	  player.moveDown = false;
+	}
   });
   
   socket.on('disconnect', function () {
@@ -59,7 +79,23 @@ setInterval(function() {
   // код ...
   var currentTime = (new Date()).getTime();
   var timeDifference = currentTime - lastUpdateTime;
-  //player.x += 5 * timeDifference;
+    
+  for (var id in players) {
+	var player = players[id];
+	 
+	if (player.moveLeft) {
+      player.x -= player.speed * timeDifference;
+    }
+    if (player.moveUp) {
+      player.y -= player.speed * timeDifference;
+    }
+    if (player.moveRight) {
+      player.x += player.speed * timeDifference;
+    }
+    if (player.moveDown) {
+      player.y += player.speed * timeDifference;
+    }  
+  }
   
   io.sockets.emit('state', players);
   
